@@ -86,6 +86,11 @@ def run_hedge_fund(
         return {
             "decisions": parse_hedge_fund_response(final_state["messages"][-1].content),
             "analyst_signals": final_state["data"]["analyst_signals"],
+            "report": {
+                "generated_at": datetime.now().strftime("%Y-%m-%d"),
+                "start_date": start_date,
+                "end_date": end_date,
+            },
         }
     finally:
         # Stop progress tracking
