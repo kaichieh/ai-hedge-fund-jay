@@ -1,4 +1,5 @@
 import sys
+import os
 
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
@@ -11,6 +12,7 @@ from src.graph.state import AgentState
 from src.utils.display import print_trading_output
 from src.utils.analysts import ANALYST_ORDER, get_analyst_nodes
 from src.utils.progress import progress
+from src.tools.api import clear_preloaded_market_data, prepare_preloaded_market_data
 from src.utils.visualize import save_graph_as_png
 from src.cli.input import (
     parse_cli_inputs,
@@ -57,6 +59,14 @@ def run_hedge_fund(
     progress.start()
 
     try:
+        financial_data_api_key = os.getenv("FINANCIAL_DATASETS_API_KEY") or os.getenv("FMP_API_KEY")
+        prepare_preloaded_market_data(
+            tickers=tickers,
+            start_date=start_date,
+            end_date=end_date,
+            api_key=financial_data_api_key,
+        )
+
         # Build workflow (default to all analysts when none provided)
         workflow = create_workflow(selected_analysts if selected_analysts else None)
         agent = workflow.compile()
@@ -93,6 +103,7 @@ def run_hedge_fund(
             },
         }
     finally:
+        clear_preloaded_market_data()
         # Stop progress tracking
         progress.stop()
 
