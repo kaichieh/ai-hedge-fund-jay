@@ -22,6 +22,16 @@ class Sentiment(BaseModel):
     confidence: int = Field(description="Confidence 0-100")
 
 
+class BatchSentimentItem(BaseModel):
+    article_index: int = Field(description="1-based article index from the prompt")
+    sentiment: Literal["positive", "negative", "neutral"]
+    confidence: int = Field(description="Confidence 0-100")
+
+
+class BatchSentimentResponse(BaseModel):
+    results: list[BatchSentimentItem]
+
+
 def news_sentiment_agent(state: AgentState, agent_id: str = "news_sentiment_agent"):
     """
     Analyzes news sentiment for a list of tickers and generates trading signals.
@@ -63,33 +73,38 @@ def news_sentiment_agent(state: AgentState, agent_id: str = "news_sentiment_agen
             
             # Analyze only the 5 most recent articles without sentiment to reduce LLM calls
             if articles_without_sentiment:
-              # We only take the first 5 articles, but this is configurable
-              num_articles_to_analyze = 5
-              articles_to_analyze = articles_without_sentiment[:num_articles_to_analyze]
-              progress.update_status(agent_id, ticker, f"Analyzing sentiment for {len(articles_to_analyze)} articles")
-              
-              for idx, news in enumerate(articles_to_analyze):
-                # We analyze based on title, but can also pass in the entire article text,
-                # but this is more expensive and requires extracting the text from the article.
-                # Note: this is an opportunity for improvement!
-                progress.update_status(agent_id, ticker, f"Analyzing sentiment for article {idx + 1} of {len(articles_to_analyze)}")
-                prompt = (
-                    f"Please analyze the sentiment of the following news headline "
-                    f"with the following context: "
-                    f"The stock is {ticker}. "
-                    f"Determine if sentiment is 'positive', 'negative', or 'neutral' for the stock {ticker} only. "
-                    f"Also provide a confidence score for your prediction from 0 to 100. "
-                    f"Respond in JSON format.\n\n"
-                    f"Headline: {news.title}"
+                # We only take the first 5 articles, but this is configurable
+                num_articles_to_analyze = 5
+                articles_to_analyze = articles_without_sentiment[:num_articles_to_analyze]
+                progress.update_status(agent_id, ticker, f"Batch analyzing sentiment for {len(articles_to_analyze)} articles")
+
+                headlines = "\n".join(
+                    f"{idx + 1}. {news.title}" for idx, news in enumerate(articles_to_analyze)
                 )
-                response = call_llm(prompt, Sentiment, agent_name=agent_id, state=state)
-                if response:
-                    news.sentiment = response.sentiment.lower()
-                    sentiment_confidences[id(news)] = response.confidence
-                else:
-                    news.sentiment = "neutral"
-                    sentiment_confidences[id(news)] = 0
-                sentiments_classified_by_llm += 1
+                prompt = (
+                    f"Please analyze the sentiment of the following news headlines for the stock {ticker}. "
+                    f"For each headline, determine whether the sentiment is 'positive', 'negative', or 'neutral' "
+                    f"for {ticker} specifically, and provide a confidence score from 0 to 100. "
+                    f"Return one result for each article index.\n\n"
+                    f"Headlines:\n{headlines}"
+                )
+                response = call_llm(prompt, BatchSentimentResponse, agent_name=agent_id, state=state)
+
+                indexed_results = {}
+                if response and response.results:
+                    indexed_results = {
+                        item.article_index: item for item in response.results
+                    }
+
+                for idx, news in enumerate(articles_to_analyze, start=1):
+                    item = indexed_results.get(idx)
+                    if item:
+                        news.sentiment = item.sentiment.lower()
+                        sentiment_confidences[id(news)] = item.confidence
+                    else:
+                        news.sentiment = "neutral"
+                        sentiment_confidences[id(news)] = 0
+                    sentiments_classified_by_llm += 1
 
             # Aggregate sentiment across all articles
             sentiment = pd.Series([n.sentiment for n in company_news]).dropna()
