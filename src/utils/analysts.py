@@ -24,7 +24,7 @@ from src.agents.growth_agent import growth_analyst_agent
 # Define analyst configuration - single source of truth
 ANALYST_CONFIG = {
     "aswath_damodaran": {
-        "display_name": "Aswath Damodaran",
+        "display_name": "Aswath Damodaran｜估值分析",
         "description": "The Dean of Valuation",
         "investing_style": "Focuses on intrinsic value and financial metrics to assess investment opportunities through rigorous valuation analysis.",
         "agent_func": aswath_damodaran_agent,
@@ -32,7 +32,7 @@ ANALYST_CONFIG = {
         "order": 0,
     },
     "ben_graham": {
-        "display_name": "Ben Graham",
+        "display_name": "Ben Graham｜深度價值分析",
         "description": "The Father of Value Investing",
         "investing_style": "Emphasizes a margin of safety and invests in undervalued companies with strong fundamentals through systematic value analysis.",
         "agent_func": ben_graham_agent,
@@ -40,7 +40,7 @@ ANALYST_CONFIG = {
         "order": 1,
     },
     "bill_ackman": {
-        "display_name": "Bill Ackman",
+        "display_name": "Bill Ackman｜事件驅動分析",
         "description": "The Activist Investor",
         "investing_style": "Seeks to influence management and unlock value through strategic activism and contrarian investment positions.",
         "agent_func": bill_ackman_agent,
@@ -48,7 +48,7 @@ ANALYST_CONFIG = {
         "order": 2,
     },
     "cathie_wood": {
-        "display_name": "Cathie Wood",
+        "display_name": "Cathie Wood｜成長創新分析",
         "description": "The Queen of Growth Investing",
         "investing_style": "Focuses on disruptive innovation and growth, investing in companies that are leading technological advancements and market disruption.",
         "agent_func": cathie_wood_agent,
@@ -56,7 +56,7 @@ ANALYST_CONFIG = {
         "order": 3,
     },
     "charlie_munger": {
-        "display_name": "Charlie Munger",
+        "display_name": "Charlie Munger｜優質企業分析",
         "description": "The Rational Thinker",
         "investing_style": "Advocates for value investing with a focus on quality businesses and long-term growth through rational decision-making.",
         "agent_func": charlie_munger_agent,
@@ -64,7 +64,7 @@ ANALYST_CONFIG = {
         "order": 4,
     },
     "michael_burry": {
-        "display_name": "Michael Burry",
+        "display_name": "Michael Burry｜逆向價值分析",
         "description": "The Big Short Contrarian",
         "investing_style": "Makes contrarian bets, often shorting overvalued markets and investing in undervalued assets through deep fundamental analysis.",
         "agent_func": michael_burry_agent,
@@ -72,7 +72,7 @@ ANALYST_CONFIG = {
         "order": 5,
     },
     "mohnish_pabrai": {
-        "display_name": "Mohnish Pabrai",
+        "display_name": "Mohnish Pabrai｜高賠率價值分析",
         "description": "The Dhandho Investor",
         "investing_style": "Focuses on value investing and long-term growth through fundamental analysis and a margin of safety.",
         "agent_func": mohnish_pabrai_agent,
@@ -80,7 +80,7 @@ ANALYST_CONFIG = {
         "order": 6,
     },
     "nassim_taleb": {
-        "display_name": "Nassim Taleb",
+        "display_name": "Nassim Taleb｜尾部風險分析",
         "description": "The Black Swan Risk Analyst",
         "investing_style": "Focuses on tail risk, antifragility, and asymmetric payoffs. Uses barbell strategy, avoids fragile companies via negativa, and seeks convex positions with limited downside and unlimited upside.",
         "agent_func": nassim_taleb_agent,
@@ -88,7 +88,7 @@ ANALYST_CONFIG = {
         "order": 7,
     },
     "peter_lynch": {
-        "display_name": "Peter Lynch",
+        "display_name": "Peter Lynch｜成長選股分析",
         "description": "The 10-Bagger Investor",
         "investing_style": "Invests in companies with understandable business models and strong growth potential using the 'buy what you know' strategy.",
         "agent_func": peter_lynch_agent,
@@ -96,7 +96,7 @@ ANALYST_CONFIG = {
         "order": 8,
     },
     "phil_fisher": {
-        "display_name": "Phil Fisher",
+        "display_name": "Phil Fisher｜企業質化分析",
         "description": "The Scuttlebutt Investor",
         "investing_style": "Emphasizes investing in companies with strong management and innovative products, focusing on long-term growth through scuttlebutt research.",
         "agent_func": phil_fisher_agent,
@@ -104,7 +104,7 @@ ANALYST_CONFIG = {
         "order": 9,
     },
     "rakesh_jhunjhunwala": {
-        "display_name": "Rakesh Jhunjhunwala",
+        "display_name": "Rakesh Jhunjhunwala｜趨勢成長分析",
         "description": "The Big Bull Of India",
         "investing_style": "Leverages macroeconomic insights to invest in high-growth sectors, particularly within emerging markets and domestic opportunities.",
         "agent_func": rakesh_jhunjhunwala_agent,
@@ -112,7 +112,7 @@ ANALYST_CONFIG = {
         "order": 10,
     },
     "stanley_druckenmiller": {
-        "display_name": "Stanley Druckenmiller",
+        "display_name": "Stanley Druckenmiller｜總體趨勢分析",
         "description": "The Macro Investor",
         "investing_style": "Focuses on macroeconomic trends, making large bets on currencies, commodities, and interest rates through top-down analysis.",
         "agent_func": stanley_druckenmiller_agent,
@@ -120,7 +120,7 @@ ANALYST_CONFIG = {
         "order": 11,
     },
     "warren_buffett": {
-        "display_name": "Warren Buffett",
+        "display_name": "Warren Buffett｜護城河價值分析",
         "description": "The Oracle of Omaha",
         "investing_style": "Seeks companies with strong fundamentals and competitive advantages through value investing and long-term ownership.",
         "agent_func": warren_buffett_agent,
@@ -128,7 +128,7 @@ ANALYST_CONFIG = {
         "order": 12,
     },
     "technical_analyst": {
-        "display_name": "Technical Analyst",
+        "display_name": "Technical Analyst｜技術面分析",
         "description": "Chart Pattern Specialist",
         "investing_style": "Focuses on chart patterns and market trends to make investment decisions, often using technical indicators and price action analysis.",
         "agent_func": technical_analyst_agent,
@@ -136,7 +136,7 @@ ANALYST_CONFIG = {
         "order": 13,
     },
     "fundamentals_analyst": {
-        "display_name": "Fundamentals Analyst",
+        "display_name": "Fundamentals Analyst｜基本面分析",
         "description": "Financial Statement Specialist",
         "investing_style": "Delves into financial statements and economic indicators to assess the intrinsic value of companies through fundamental analysis.",
         "agent_func": fundamentals_analyst_agent,
@@ -144,7 +144,7 @@ ANALYST_CONFIG = {
         "order": 14,
     },
     "growth_analyst": {
-        "display_name": "Growth Analyst",
+        "display_name": "Growth Analyst｜成長性分析",
         "description": "Growth Specialist",
         "investing_style": "Analyzes growth trends and valuation to identify growth opportunities through growth analysis.",
         "agent_func": growth_analyst_agent,
@@ -152,7 +152,7 @@ ANALYST_CONFIG = {
         "order": 15,
     },
     "news_sentiment_analyst": {
-        "display_name": "News Sentiment Analyst",
+        "display_name": "News Sentiment Analyst｜新聞情緒分析",
         "description": "News Sentiment Specialist",
         "investing_style": "Analyzes news sentiment to predict market movements and identify opportunities through news analysis.",
         "agent_func": news_sentiment_agent,
@@ -160,7 +160,7 @@ ANALYST_CONFIG = {
         "order": 16,
     },
     "sentiment_analyst": {
-        "display_name": "Sentiment Analyst",
+        "display_name": "Sentiment Analyst｜市場情緒分析",
         "description": "Market Sentiment Specialist",
         "investing_style": "Gauges market sentiment and investor behavior to predict market movements and identify opportunities through behavioral analysis.",
         "agent_func": sentiment_analyst_agent,
@@ -168,7 +168,7 @@ ANALYST_CONFIG = {
         "order": 17,
     },
     "valuation_analyst": {
-        "display_name": "Valuation Analyst",
+        "display_name": "Valuation Analyst｜估值模型分析",
         "description": "Company Valuation Specialist",
         "investing_style": "Specializes in determining the fair value of companies, using various valuation models and financial metrics for investment decisions.",
         "agent_func": valuation_analyst_agent,

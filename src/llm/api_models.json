@@ -1,72 +1,107 @@
 [
   {
-    "display_name": "Grok 4",
+    "display_name": "[xAI API] Grok 4",
     "model_name": "grok-4-0709",
     "provider": "xAI"
   },
   {
-    "display_name": "GPT-5.4",
+    "display_name": "[OpenAI API] GPT-5.4",
     "model_name": "gpt-5.4",
     "provider": "OpenAI"
   },
   {
-    "display_name": "GPT-4.1",
+    "display_name": "[OpenAI API] GPT-4.1",
     "model_name": "gpt-4.1",
     "provider": "OpenAI"
   },
   {
-    "display_name": "Claude Sonnet 4.6",
+    "display_name": "[Anthropic API] Claude Sonnet 4.6",
     "model_name": "claude-sonnet-4-6",
     "provider": "Anthropic"
   },
   {
-    "display_name": "Claude Haiku 4.6",
+    "display_name": "[Anthropic API] Claude Haiku 4.6",
     "model_name": "claude-haiku-4-6",
     "provider": "Anthropic"
   },
   {
-    "display_name": "Claude Opus 4.6",
+    "display_name": "[Anthropic API] Claude Opus 4.6",
     "model_name": "claude-opus-4-6",
     "provider": "Anthropic"
   },
   {
-    "display_name": "DeepSeek R1",
+    "display_name": "[DeepSeek API] DeepSeek R1",
     "model_name": "deepseek-reasoner",
     "provider": "DeepSeek"
   },
   {
-    "display_name": "DeepSeek V3",
+    "display_name": "[DeepSeek API] DeepSeek V3",
     "model_name": "deepseek-chat",
     "provider": "DeepSeek"
   },
   {
-    "display_name": "Gemini 3 Pro",
+    "display_name": "[Google API] Gemini 3 Pro",
     "model_name": "gemini-3-pro-preview",
     "provider": "Google"
   },
   {
-    "display_name": "GLM-4.5 Air",
+    "display_name": "[OpenRouter API] OpenRouter Auto",
+    "model_name": "openrouter/auto",
+    "provider": "OpenRouter"
+  },
+  {
+    "display_name": "[OpenRouter API] GPT-5.1",
+    "model_name": "openai/gpt-5.1",
+    "provider": "OpenRouter"
+  },
+  {
+    "display_name": "[OpenRouter API] Claude Sonnet 4.5",
+    "model_name": "anthropic/claude-sonnet-4.5",
+    "provider": "OpenRouter"
+  },
+  {
+    "display_name": "[OpenRouter API] Claude Haiku 4.5",
+    "model_name": "anthropic/claude-haiku-4.5",
+    "provider": "OpenRouter"
+  },
+  {
+    "display_name": "[OpenRouter API] Gemini 2.5 Pro",
+    "model_name": "google/gemini-2.5-pro",
+    "provider": "OpenRouter"
+  },
+  {
+    "display_name": "[OpenRouter API] DeepSeek V3.2",
+    "model_name": "deepseek/deepseek-v3.2",
+    "provider": "OpenRouter"
+  },
+  {
+    "display_name": "[OpenRouter API] GLM-4.5 Air",
     "model_name": "z-ai/glm-4.5-air",
     "provider": "OpenRouter"
   },
   {
-    "display_name": "GLM-4.5",
+    "display_name": "[OpenRouter API] GLM-4.5",
     "model_name": "z-ai/glm-4.5",
     "provider": "OpenRouter"
   },
   {
-    "display_name": "Qwen 3 (235B) Thinking",
+    "display_name": "[OpenRouter API] Qwen 3 (235B) Thinking",
     "model_name": "qwen/qwen3-235b-a22b-thinking-2507",
     "provider": "OpenRouter"
   },
   {
-    "display_name": "GigaChat-2-Max",
+    "display_name": "[GigaChat API] GigaChat-2-Max",
     "model_name": "GigaChat-2-Max",
     "provider": "GigaChat"
   },
   {
-    "display_name": "Azure Open AI Deployment",
+    "display_name": "[Azure OpenAI API] Azure Open AI Deployment",
     "model_name": "",
     "provider": "Azure OpenAI"
+  },
+  {
+    "display_name": "[OpenRouter API] MiniMax M2.7",
+    "model_name": "minimax/minimax-m2.7",
+    "provider": "OpenRouter"
   }
 ]

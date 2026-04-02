@@ -2,9 +2,46 @@
 
 import json
 from pydantic import BaseModel
+from langchain_core.messages import SystemMessage
+from langchain_core.messages import BaseMessage
 from src.llm.models import get_model, get_model_info
 from src.utils.progress import progress
 from src.graph.state import AgentState
+
+CHINESE_OUTPUT_INSTRUCTION = (
+    "請以繁體中文撰寫所有自然語言內容。"
+    "若輸出必須是 JSON，請嚴格遵守原本指定的 JSON 結構與欄位名稱。"
+    "不要翻譯 JSON keys、ticker、代碼、數值、既定 enum 值，"
+    "例如 bullish、bearish、neutral、buy、sell、hold 等應維持原樣。"
+    "只有說明、分析、reasoning 等自然語言欄位需要使用繁體中文。"
+)
+
+
+def prepare_prompt_for_chinese_output(prompt: any) -> any:
+    """Inject a language instruction so agent explanations default to Traditional Chinese."""
+    if isinstance(prompt, str):
+        return f"{prompt}\n\n{CHINESE_OUTPUT_INSTRUCTION}"
+
+    if hasattr(prompt, "to_messages"):
+        messages = prompt.to_messages()
+        return inject_language_instruction(messages)
+
+    if isinstance(prompt, list):
+        return inject_language_instruction(prompt)
+
+    return prompt
+
+
+def inject_language_instruction(messages: list[BaseMessage]) -> list[BaseMessage]:
+    """Place the language rule after existing system prompts so it wins over persona text."""
+    language_message = SystemMessage(content=CHINESE_OUTPUT_INSTRUCTION)
+    insert_at = 0
+
+    for index, message in enumerate(messages):
+        if getattr(message, "type", None) == "system":
+            insert_at = index + 1
+
+    return [*messages[:insert_at], language_message, *messages[insert_at:]]
 
 
 def call_llm(
@@ -47,6 +84,7 @@ def call_llm(
 
     model_info = get_model_info(model_name, model_provider)
     llm = get_model(model_name, model_provider, api_keys)
+    prompt = prepare_prompt_for_chinese_output(prompt)
 
     # For non-JSON support models, we can use structured output
     if not (model_info and not model_info.has_json_mode()):
@@ -89,7 +127,7 @@ def create_default_response(model_class: type[BaseModel]) -> BaseModel:
     default_values = {}
     for field_name, field in model_class.model_fields.items():
         if field.annotation == str:
-            default_values[field_name] = "Error in analysis, using default"
+            default_values[field_name] = "分析過程發生錯誤，已使用預設值"
         elif field.annotation == float:
             default_values[field_name] = 0.0
         elif field.annotation == int:

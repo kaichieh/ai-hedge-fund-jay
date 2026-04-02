@@ -1,8 +1,10 @@
 from colorama import Fore, Style
 from tabulate import tabulate
 from .analysts import ANALYST_ORDER
+from .agent_display import get_agent_display_name
 import os
 import json
+import unicodedata
 
 
 def sort_agent_signals(signals):
@@ -12,6 +14,96 @@ def sort_agent_signals(signals):
     analyst_order["Risk Management"] = len(ANALYST_ORDER)  # Add Risk Management at the end
 
     return sorted(signals, key=lambda x: analyst_order.get(x[0], 999))
+
+
+def _format_scalar(value):
+    if isinstance(value, float):
+        return f"{value:.2f}"
+    return str(value)
+
+
+def _format_metrics(metrics: dict) -> str:
+    items = [f"{key}: {_format_scalar(value)}" for key, value in metrics.items()]
+    return "，".join(items)
+
+
+def _summarize_reasoning(reasoning) -> str:
+    """Render agent reasoning into a compact, readable CLI string."""
+    if not reasoning:
+        return ""
+
+    if isinstance(reasoning, str):
+        return reasoning
+
+    if isinstance(reasoning, dict):
+        parts = []
+        for section, payload in reasoning.items():
+            if isinstance(payload, dict):
+                signal = payload.get("signal")
+                confidence = payload.get("confidence")
+                metrics = payload.get("metrics")
+                details = []
+                if signal:
+                    details.append(f"訊號={signal}")
+                if confidence is not None:
+                    details.append(f"信心={_format_scalar(confidence)}")
+                if isinstance(metrics, dict) and metrics:
+                    details.append(_format_metrics(metrics))
+
+                if details:
+                    parts.append(f"{section}: " + "；".join(details))
+                    continue
+
+            parts.append(f"{section}: {_format_scalar(payload)}")
+
+        if parts:
+            return "\n".join(parts)
+
+        return json.dumps(reasoning, ensure_ascii=False, indent=2)
+
+    return str(reasoning)
+
+
+def _wrap_text(text: str, max_line_length: int = 60) -> str:
+    if not text:
+        return ""
+
+    def char_width(char: str) -> int:
+        if unicodedata.east_asian_width(char) in ("W", "F"):
+            return 2
+        return 1
+
+    def wrap_line(line: str) -> list[str]:
+        wrapped_lines = []
+        current = ""
+        current_width = 0
+
+        for char in line:
+            if char == "\n":
+                wrapped_lines.append(current.rstrip())
+                current = ""
+                current_width = 0
+                continue
+
+            width = char_width(char)
+            if current and current_width + width > max_line_length:
+                wrapped_lines.append(current.rstrip())
+                current = char
+                current_width = width
+            else:
+                current += char
+                current_width += width
+
+        if current or not wrapped_lines:
+            wrapped_lines.append(current.rstrip())
+
+        return wrapped_lines
+
+    wrapped = []
+    for line in str(text).splitlines():
+        wrapped.extend(wrap_line(line))
+
+    return "\n".join(wrapped)
 
 
 def print_trading_output(result: dict) -> None:
@@ -42,7 +134,7 @@ def print_trading_output(result: dict) -> None:
                 continue
 
             signal = signals[ticker]
-            agent_name = agent.replace("_agent", "").replace("_", " ").title()
+            agent_name = get_agent_display_name(agent)
             signal_type = signal.get("signal", "").upper()
             confidence = signal.get("confidence", 0)
 
@@ -55,36 +147,7 @@ def print_trading_output(result: dict) -> None:
             # Get reasoning if available
             reasoning_str = ""
             if "reasoning" in signal and signal["reasoning"]:
-                reasoning = signal["reasoning"]
-                
-                # Handle different types of reasoning (string, dict, etc.)
-                if isinstance(reasoning, str):
-                    reasoning_str = reasoning
-                elif isinstance(reasoning, dict):
-                    # Convert dict to string representation
-                    reasoning_str = json.dumps(reasoning, indent=2)
-                else:
-                    # Convert any other type to string
-                    reasoning_str = str(reasoning)
-                
-                # Wrap long reasoning text to make it more readable
-                wrapped_reasoning = ""
-                current_line = ""
-                # Use a fixed width of 60 characters to match the table column width
-                max_line_length = 60
-                for word in reasoning_str.split():
-                    if len(current_line) + len(word) + 1 > max_line_length:
-                        wrapped_reasoning += current_line + "\n"
-                        current_line = word
-                    else:
-                        if current_line:
-                            current_line += " " + word
-                        else:
-                            current_line = word
-                if current_line:
-                    wrapped_reasoning += current_line
-                
-                reasoning_str = wrapped_reasoning
+                reasoning_str = _wrap_text(_summarize_reasoning(signal["reasoning"]))
 
             table_data.append(
                 [
@@ -98,11 +161,11 @@ def print_trading_output(result: dict) -> None:
         # Sort the signals according to the predefined order
         table_data = sort_agent_signals(table_data)
 
-        print(f"\n{Fore.WHITE}{Style.BRIGHT}AGENT ANALYSIS:{Style.RESET_ALL} [{Fore.CYAN}{ticker}{Style.RESET_ALL}]")
+        print(f"\n{Fore.WHITE}{Style.BRIGHT}Agent 分析:{Style.RESET_ALL} [{Fore.CYAN}{ticker}{Style.RESET_ALL}]")
         print(
             tabulate(
                 table_data,
-                headers=[f"{Fore.WHITE}Agent", "Signal", "Confidence", "Reasoning"],
+                headers=[f"{Fore.WHITE}Agent", "訊號", "信心", "分析說明"],
                 tablefmt="grid",
                 colalign=("left", "center", "right", "left"),
             )
@@ -121,38 +184,23 @@ def print_trading_output(result: dict) -> None:
         # Get reasoning and format it
         reasoning = decision.get("reasoning", "")
         # Wrap long reasoning text to make it more readable
-        wrapped_reasoning = ""
-        if reasoning:
-            current_line = ""
-            # Use a fixed width of 60 characters to match the table column width
-            max_line_length = 60
-            for word in reasoning.split():
-                if len(current_line) + len(word) + 1 > max_line_length:
-                    wrapped_reasoning += current_line + "\n"
-                    current_line = word
-                else:
-                    if current_line:
-                        current_line += " " + word
-                    else:
-                        current_line = word
-            if current_line:
-                wrapped_reasoning += current_line
+        wrapped_reasoning = _wrap_text(reasoning)
 
         decision_data = [
-            ["Action", f"{action_color}{action}{Style.RESET_ALL}"],
-            ["Quantity", f"{action_color}{decision.get('quantity')}{Style.RESET_ALL}"],
+            ["動作", f"{action_color}{action}{Style.RESET_ALL}"],
+            ["數量", f"{action_color}{decision.get('quantity')}{Style.RESET_ALL}"],
             [
-                "Confidence",
+                "信心",
                 f"{Fore.WHITE}{decision.get('confidence'):.1f}%{Style.RESET_ALL}",
             ],
-            ["Reasoning", f"{Fore.WHITE}{wrapped_reasoning}{Style.RESET_ALL}"],
+            ["分析說明", f"{Fore.WHITE}{wrapped_reasoning}{Style.RESET_ALL}"],
         ]
         
-        print(f"\n{Fore.WHITE}{Style.BRIGHT}TRADING DECISION:{Style.RESET_ALL} [{Fore.CYAN}{ticker}{Style.RESET_ALL}]")
+        print(f"\n{Fore.WHITE}{Style.BRIGHT}交易決策:{Style.RESET_ALL} [{Fore.CYAN}{ticker}{Style.RESET_ALL}]")
         print(tabulate(decision_data, tablefmt="grid", colalign=("left", "left")))
 
     # Print Portfolio Summary
-    print(f"\n{Fore.WHITE}{Style.BRIGHT}PORTFOLIO SUMMARY:{Style.RESET_ALL}")
+    print(f"\n{Fore.WHITE}{Style.BRIGHT}投資組合摘要:{Style.RESET_ALL}")
     portfolio_data = []
     
     # Extract portfolio manager reasoning (common for all tickers)
@@ -202,9 +250,9 @@ def print_trading_output(result: dict) -> None:
 
     headers = [
         f"{Fore.WHITE}Ticker",
-        f"{Fore.WHITE}Action",
-        f"{Fore.WHITE}Quantity",
-        f"{Fore.WHITE}Confidence",
+        f"{Fore.WHITE}動作",
+        f"{Fore.WHITE}數量",
+        f"{Fore.WHITE}信心",
         f"{Fore.WHITE}Bullish",
         f"{Fore.WHITE}Bearish",
         f"{Fore.WHITE}Neutral",
@@ -223,34 +271,10 @@ def print_trading_output(result: dict) -> None:
     # Print Portfolio Manager's reasoning if available
     if portfolio_manager_reasoning:
         # Handle different types of reasoning (string, dict, etc.)
-        reasoning_str = ""
-        if isinstance(portfolio_manager_reasoning, str):
-            reasoning_str = portfolio_manager_reasoning
-        elif isinstance(portfolio_manager_reasoning, dict):
-            # Convert dict to string representation
-            reasoning_str = json.dumps(portfolio_manager_reasoning, indent=2)
-        else:
-            # Convert any other type to string
-            reasoning_str = str(portfolio_manager_reasoning)
+        reasoning_str = _summarize_reasoning(portfolio_manager_reasoning)
+        wrapped_reasoning = _wrap_text(reasoning_str)
             
-        # Wrap long reasoning text to make it more readable
-        wrapped_reasoning = ""
-        current_line = ""
-        # Use a fixed width of 60 characters to match the table column width
-        max_line_length = 60
-        for word in reasoning_str.split():
-            if len(current_line) + len(word) + 1 > max_line_length:
-                wrapped_reasoning += current_line + "\n"
-                current_line = word
-            else:
-                if current_line:
-                    current_line += " " + word
-                else:
-                    current_line = word
-        if current_line:
-            wrapped_reasoning += current_line
-            
-        print(f"\n{Fore.WHITE}{Style.BRIGHT}Portfolio Strategy:{Style.RESET_ALL}")
+        print(f"\n{Fore.WHITE}{Style.BRIGHT}投資組合策略:{Style.RESET_ALL}")
         print(f"{Fore.CYAN}{wrapped_reasoning}{Style.RESET_ALL}")
 
 
